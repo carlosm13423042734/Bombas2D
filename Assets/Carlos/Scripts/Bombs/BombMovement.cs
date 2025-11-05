@@ -6,27 +6,22 @@ using UnityEngine;
 public class BombMovement : MonoBehaviour, IExploitable
 {
     [SerializeField] 
-    private float timeToExplode;
-    [SerializeField] 
     private float explosionForce;
     [SerializeField] 
     private float explosionRadius;
     [SerializeField] 
-    private bool destroyAfterExplosion = true;
+    private bool destroyAfterExplosion;
 
     private bool hasExploded = false;
 
-    void Start()
+    void Update()
     {
-        // Inicia la cuenta atrás
-        StartCoroutine(CountdownRoutine());
+        if (Input.GetKeyDown(KeyCode.E)) {
+            explode();
+        }
     }
 
-    private IEnumerator CountdownRoutine()
-    {
-        yield return new WaitForSeconds(timeToExplode);
-        explode();
-    }
+    
 
     public void explode()
     {
@@ -38,15 +33,15 @@ public class BombMovement : MonoBehaviour, IExploitable
         {
             if (hit.CompareTag("Player"))
             {
-                Rigidbody2D rb = hit.attachedRigidbody;
+                Rigidbody2D rb = hit.GetComponent<Rigidbody2D>();
                 if (rb != null)
                 {
-                    Vector2 direction = (rb.position - (Vector2)transform.position).normalized;
+                    Vector2 direction = hit.transform.position - transform.position;
 
-                    float distance = Vector2.Distance(rb.position, transform.position);
-                    float adjustedForce = Mathf.Lerp(explosionForce, 0f, distance / explosionRadius);
+                    float distance = 1 + direction.magnitude;
+                    float adjustedForce = explosionForce / distance;
 
-                    rb.AddForce(direction * adjustedForce, ForceMode2D.Impulse);
+                    rb.AddForce(direction * adjustedForce);
                 }
             }
         }
