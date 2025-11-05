@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] private float velocity;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private LayerMask ground;
+    [SerializeField]
+    private float velocity;
+    [SerializeField]
+    private float jumpForce;
+    [SerializeField]
+    private LayerMask ground;
 
     private Rigidbody2D rb;
     private bool isGrounded = false;
     private float moveInput;
-
-    // knockback temporal
-    private Vector2 externalForce = Vector2.zero;
-    private float externalForceDuration = 0f;
 
     void Start()
     {
@@ -24,24 +23,18 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         moveInput = Input.GetAxisRaw("Horizontal");
+
         isGrounded = CheckGrounded();
 
         if (Input.GetButtonDown("Jump") && isGrounded)
+        {
             Jump();
+        }
     }
 
     void FixedUpdate()
     {
-        // Mientras haya knockback, se ignora el control lateral
-        if (externalForceDuration > 0f)
-        {
-            rb.velocity = externalForce;
-            externalForceDuration -= Time.fixedDeltaTime;
-        }
-        else
-        {
-            rb.velocity = new Vector2(moveInput * velocity, rb.velocity.y);
-        }
+        rb.velocity = new Vector2(moveInput * velocity, rb.velocity.y);
     }
 
     private void Jump()
@@ -49,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
-
+    //Metodo para comprobar si está en el suelo y evitar el doble salto(2 raycast, en la parte derecha y en la parte izquierda
     private bool CheckGrounded()
     {
         float halfWidth = GetComponent<Collider2D>().bounds.extents.x;
@@ -63,7 +56,7 @@ public class PlayerMovement : MonoBehaviour
 
         return leftHit.collider != null || rightHit.collider != null;
     }
-
+    //Metodo para ver los rayos al probarlo
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -75,12 +68,5 @@ public class PlayerMovement : MonoBehaviour
 
         Gizmos.DrawRay(leftRayOrigin, Vector2.down * offsetY);
         Gizmos.DrawRay(rightRayOrigin, Vector2.down * offsetY);
-    }
-
-    // Método público para que la bomba llame
-    public void ApplyKnockback(Vector2 direction, float force, float duration = 0.3f)
-    {
-        externalForce = direction.normalized * force;
-        externalForceDuration = duration;
     }
 }
