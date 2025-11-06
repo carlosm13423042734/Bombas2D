@@ -11,6 +11,8 @@ public class BombMovement : MonoBehaviour, IExploitable
     private float explosionRadius;
     [SerializeField] 
     private bool destroyAfterExplosion;
+    [SerializeField] 
+    private ParticleSystem explosionEffect;
 
     private bool hasExploded = false;
 
@@ -27,8 +29,17 @@ public class BombMovement : MonoBehaviour, IExploitable
     {
         if (hasExploded) return;
         hasExploded = true;
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
+        
 
+        if (explosionEffect != null) //Metodo para que la bomba haga PUM visualmente
+        {
+            ParticleSystem effect = Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            effect.Play();
+            Destroy(effect.gameObject, effect.main.duration);
+        }
+
+
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, explosionRadius);
         foreach (Collider2D hit in hits)
         {
             if (hit.CompareTag("Player"))
