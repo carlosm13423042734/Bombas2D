@@ -227,7 +227,7 @@ GameObject:
   - component: {fileID: 341041808}
   - component: {fileID: 341041807}
   - component: {fileID: 341041811}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -393,7 +393,7 @@ GameObject:
   - component: {fileID: 577347134}
   - component: {fileID: 577347133}
   - component: {fileID: 577347137}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
