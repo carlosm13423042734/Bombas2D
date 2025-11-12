@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Bomb
   - Trigger
+  - BombDropper
   layers:
   - Default
   - TransparentFX

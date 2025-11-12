@@ -8,24 +8,20 @@ public class GonzaloBomb : MonoBehaviour
     private float radius;
     [SerializeField]
     private float explosionPower;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Explosion();
-        }
-    }
+    [SerializeField]
+    private ParticleSystem explosionEffect;
 
     public void Explosion()
     {
         Collider2D[] objetos = Physics2D.OverlapCircleAll(transform.position, radius);
+
+        //Metodo para que la bomba haga PUM visualmente
+        if (explosionEffect != null)
+        {
+            ParticleSystem effect = Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            effect.Play();
+            Destroy(effect.gameObject, effect.main.duration);
+        }
 
         foreach (Collider2D colisionador in objetos)
         {
@@ -38,8 +34,7 @@ public class GonzaloBomb : MonoBehaviour
                 rb2D.AddForce(direccion * fuerzaFinal);
             }
         }
-
-        Destroy(gameObject);
+        Destroy(this.gameObject, 0.1f);
     }
 
     private void OnDrawGizmos()
