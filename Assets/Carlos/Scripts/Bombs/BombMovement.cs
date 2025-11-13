@@ -19,13 +19,13 @@ public class BombMovement : MonoBehaviour, IExploitable
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.E)) {
-            explode();
+            Explode();
         }
     }
 
     
 
-    public void explode()
+    public void Explode()
     {
         if (hasExploded) return;
         hasExploded = true;

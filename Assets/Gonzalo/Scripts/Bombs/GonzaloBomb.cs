@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class GonzaloBomb : MonoBehaviour
+public class GonzaloBomb : MonoBehaviour, IExploitable
 {
     [SerializeField]
     private float radius;
@@ -11,7 +12,8 @@ public class GonzaloBomb : MonoBehaviour
     [SerializeField]
     private ParticleSystem explosionEffect;
 
-    public void Explosion()
+    //Explosión de la bomba
+    public void Explode()
     {
         Collider2D[] objetos = Physics2D.OverlapCircleAll(transform.position, radius);
 
@@ -23,20 +25,22 @@ public class GonzaloBomb : MonoBehaviour
             Destroy(effect.gameObject, effect.main.duration);
         }
 
-        foreach (Collider2D colisionador in objetos)
+        //Empuja a cada objeto con collider, después se destruye
+        foreach (Collider2D collider in objetos)
         {
-            Rigidbody2D rb2D = colisionador.GetComponent<Rigidbody2D>();
+            Rigidbody2D rb2D = collider.GetComponent<Rigidbody2D>();
             if (rb2D != null)
             {
-                Vector2 direccion = colisionador.transform.position - transform.position;
-                float distancia = 1 + direccion.magnitude;
-                float fuerzaFinal = explosionPower / distancia;
-                rb2D.AddForce(direccion * fuerzaFinal);
+                Vector2 direction = (collider.transform.position - transform.position).normalized;
+                float distance = 1 + direction.magnitude;
+                float force = explosionPower / distance;
+                rb2D.AddForce(direction * force);
             }
         }
         Destroy(this.gameObject, 0.1f);
     }
 
+    //Método para ver en el editor el radio de la explosión
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

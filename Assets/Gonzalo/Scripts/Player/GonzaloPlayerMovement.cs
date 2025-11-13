@@ -24,7 +24,8 @@ public class GonzaloPlayerMovement : MonoBehaviour
     private float anchoPersonaje;
     private float lastHorizontalSpeed;
     private float speedX;
-    private bool IsAllowedToMove = true;
+    public bool IsAllowedToMove = true;
+    public bool IsBeenImpulsed = false;
     private bool isGrounded = true;
     RaycastHit2D rayCastGround1;
     RaycastHit2D rayCastGround2;
@@ -41,6 +42,7 @@ public class GonzaloPlayerMovement : MonoBehaviour
     
     private void FixedUpdate()
     {
+        //Si el jugador no puede moverse esto no se cumple
         if (!IsAllowedToMove) return;
 
         speedX = movement.x * moveSpeed;
@@ -52,7 +54,9 @@ public class GonzaloPlayerMovement : MonoBehaviour
         }
         else
         {
-            // Si no hay input, detenemos el movimiento horizontal
+            //Si el jugador está siendo impulsado esto no se cumple
+            if (IsBeenImpulsed) return;
+            // Si no hay input, el movimiento horizontal se detiene para mejorar la experiencia de movimiento
             rb.velocity = new Vector2(0f, rb.velocity.y);
         }
 
@@ -63,6 +67,7 @@ public class GonzaloPlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Acciones de movimiento
         if (IsAllowedToMove == true)
         {
             PlayerMotion();
@@ -70,9 +75,11 @@ public class GonzaloPlayerMovement : MonoBehaviour
             RayDraws();
         }
 
+        //Comprobar que está en tierra
         if (rayCastGround1 || rayCastGround2)
         {
             isGrounded = true;
+            IsBeenImpulsed = false;
         }
         else
         {
@@ -80,7 +87,8 @@ public class GonzaloPlayerMovement : MonoBehaviour
         }
     }
 
-    private void PlayerMotion() //Movimiento del jugador
+    //Movimiento del jugador
+    private void PlayerMotion() 
     {
         //Lectura de movimiento
         movement.x = Input.GetAxisRaw("Horizontal");
@@ -96,19 +104,19 @@ public class GonzaloPlayerMovement : MonoBehaviour
 
     }
 
-    //Metodo que gestiona el salto de Mario a base de RayCasts, así se comprueba si está en el suelo o no para evitar saltar en el aire
+    //Metodo que gestiona el salto del jugador a base de RayCasts, así se comprueba si está en el suelo o no, para evitar saltar en el aire
     void Jumping()
     {
         rayCastGround1 = Physics2D.Raycast(new Vector2((this.transform.position.x + anchoPersonaje / 2), this.transform.position.y), Vector2.down, 0.7f, capaRequerida);
-        rayCastGround2 = Physics2D.Raycast(new Vector2(this.transform.position.x - anchoPersonaje / 2, this.transform.position.y), Vector2.down, 0.7f, capaRequerida);     
-        // If it hits something...
+        rayCastGround2 = Physics2D.Raycast(new Vector2((this.transform.position.x - anchoPersonaje / 2), this.transform.position.y), Vector2.down, 0.7f, capaRequerida);     
+        // Si el Raycast choca con una capa asignada y el jugador presiona espacio, salta
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
         {
             rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
         }
     }
 
-    //Método de comprobación para simular los Raycast que detectan que el jugador pueda saltar
+    //Método de comprobación en tiempo de ejecución para simular los Raycast que detectan que el jugador pueda saltar 
     private void RayDraws()
     {
         Debug.DrawRay(new Vector2(this.transform.position.x + anchoPersonaje / 2, this.transform.position.y), Vector2.down, Color.red);
