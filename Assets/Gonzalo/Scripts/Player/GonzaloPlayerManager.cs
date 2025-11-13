@@ -4,15 +4,16 @@ using UnityEngine;
 
 public class GonzaloPlayerManager : MonoBehaviour
 {
+    private PlayerThrowMode throwMode;
 
-    // Start is called before the first frame update
-    void Start()
+    //Set del modo de lanzado del personaje
+    public void SetPlayerThrowMode(PlayerThrowMode newThrowMode)
     {
+        this.throwMode = newThrowMode;
     }
-
-    // Update is called once per frame
-    void Update()
+    //Get del modo de lanzado del personaje
+    public PlayerThrowMode GetPlayerThrowMode()
     {
-        
+        return this.throwMode;
     }
 }

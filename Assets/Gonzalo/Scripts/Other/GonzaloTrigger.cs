@@ -9,12 +9,12 @@ public class GonzaloTrigger : MonoBehaviour
     [SerializeField]
     GameObject spawn2;
 
-    Camera camera;
+    Camera camera1;
     private bool passed = false;
 
     private void Awake()
     {
-        camera = Camera.main;
+        camera1 = Camera.main;
     }
 
     //Método para mover la cámara a un punto o a otro
@@ -22,7 +22,7 @@ public class GonzaloTrigger : MonoBehaviour
     {
         if (collision != null)
         {
-            GonzaloCamera cameraScript = camera.gameObject.GetComponent<GonzaloCamera>();
+            GonzaloCamera cameraScript = camera1.gameObject.GetComponent<GonzaloCamera>();
 
             //Si el jugador no ha pasado la fase, la cámara se mueve hacia el siguiente punto
             if (passed == false)

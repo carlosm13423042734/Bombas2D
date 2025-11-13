@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class GonzaloPlayerDropBomb : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class GonzaloPlayerDropBomb : MonoBehaviour
     private List<GameObject> listBombs;
     public int bombCount = 0;
     private GonzaloPlayerMovement playerMovementScript;
+    private PlayerThrowMode throwMode;
 
     // Start is called before the first frame update
     private void Start()
@@ -26,11 +28,40 @@ public class GonzaloPlayerDropBomb : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Pulsar Q para dropear bomba
-        if (Input.GetKeyUp(KeyCode.Q))
+        //Pulsar flechas para dropear bomba
+        if (Input.GetKeyUp(KeyCode.UpArrow))
         {
+            //Establecer modo de lanzamiento
+            GonzaloGameManager.Instance.PlayerManager.SetPlayerThrowMode(PlayerThrowMode.Up);
             //Si no has llegado al límite de bombas, dropeas una bomba y se añade 1 al contador
             if (bombCount >= numBombs) return;            
+            DropBomb();
+            bombCount++;
+        }
+        if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            //Establecer modo de lanzamiento
+            GonzaloGameManager.Instance.PlayerManager.SetPlayerThrowMode(PlayerThrowMode.Down);
+            //Si no has llegado al límite de bombas, dropeas una bomba y se añade 1 al contador
+            if (bombCount >= numBombs) return;
+            DropBomb();
+            bombCount++;
+        }
+        if (Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            //Establecer modo de lanzamiento
+            GonzaloGameManager.Instance.PlayerManager.SetPlayerThrowMode(PlayerThrowMode.Forward);
+            //Si no has llegado al límite de bombas, dropeas una bomba y se añade 1 al contador
+            if (bombCount >= numBombs) return;
+            DropBomb();
+            bombCount++;
+        }
+        if (Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            //Establecer modo de lanzamiento
+            GonzaloGameManager.Instance.PlayerManager.SetPlayerThrowMode(PlayerThrowMode.Forward);
+            //Si no has llegado al límite de bombas, dropeas una bomba y se añade 1 al contador
+            if (bombCount >= numBombs) return;
             DropBomb();
             bombCount++;
         }
@@ -45,8 +76,39 @@ public class GonzaloPlayerDropBomb : MonoBehaviour
     //Dropear bomba, se instancia una nueva bomba y se añade a una lista
     private void DropBomb()
     {
-        newBomb = Instantiate(Bomb, bombDropper.position, bombDropper.rotation);
-        listBombs.Add(newBomb);
+        //Obtener el modo de lanzamiento de bombas
+        throwMode = GonzaloGameManager.Instance.PlayerManager.GetPlayerThrowMode();
+        //Según el modo, lanzaremos la bomba de una manera u otra
+        switch (throwMode)
+        {
+            case PlayerThrowMode.Up:
+                //Lanzamos la bomba hacia arriba
+                newBomb = Instantiate(Bomb, bombDropper.position + new Vector3(0,1), bombDropper.rotation);
+                newBomb.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 10f, ForceMode2D.Impulse);
+                listBombs.Add(newBomb);
+                break;
+            case PlayerThrowMode.Down:
+                //Dejamos la bomba debajo nuestra, no hace falta hacer nada
+                newBomb = Instantiate(Bomb, bombDropper.position, bombDropper.rotation);
+                listBombs.Add(newBomb);
+                break;
+            case PlayerThrowMode.Forward:
+                //Lanzamos la bomba hacia la derecha o izquierda
+                newBomb = Instantiate(Bomb, bombDropper.position + new Vector3(0, 1), bombDropper.rotation);
+                newBomb.GetComponent<Rigidbody2D>().AddForce(Vector2.up * 5f, ForceMode2D.Impulse);
+                //Hacia la derecha
+                if (playerMovementScript.GetPlayerDirection())
+                {
+                    newBomb.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 5f, ForceMode2D.Impulse);
+                }
+                //Hacia la izquierda
+                if (!playerMovementScript.GetPlayerDirection())
+                {
+                    newBomb.GetComponent<Rigidbody2D>().AddForce(Vector2.left * 5f, ForceMode2D.Impulse);
+                }
+                listBombs.Add(newBomb);
+                break;
+        }
     }
 
     //Explotar las bombas
@@ -66,27 +128,7 @@ public class GonzaloPlayerDropBomb : MonoBehaviour
             //Se borran las bombas de la lista y se reinicia el contador de bombas
             listBombs.RemoveAll(bomb => bomb == null);
             bombCount = 0;
-            //En inician Corrutinas para que la explosión de la bomba sea más realista, impidiendo que el jugador pueda moverse ni se detenga el movimiento horizontal antes de tiempo.
-            //Es decir, dejamos que la física haga lo suyo
-            StartCoroutine(PlayerCantMove());
-            StartCoroutine(PlayerIsImpulsed());
         }
-    }
-
-    //Corrutina para que el jugador no pueda moverse
-    IEnumerator PlayerCantMove()
-    {
-        playerMovementScript.IsAllowedToMove = false; 
-        yield return new WaitForSeconds(0.5f);
-        playerMovementScript.IsAllowedToMove = true;
-    }
-
-    //Corrutina para que el movimiento horizontal no se detenga
-    IEnumerator PlayerIsImpulsed()
-    {
-        playerMovementScript.IsBeenImpulsed = true;
-        yield return new WaitForSeconds(1.5f);
-        //playerMovementScript.IsBeenImpulsed = false;
     }
 
     //Enviar número de bombas disponibles

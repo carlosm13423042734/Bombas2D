@@ -27,6 +27,7 @@ public class GonzaloPlayerMovement : MonoBehaviour
     public bool IsAllowedToMove = true;
     public bool IsBeenImpulsed = false;
     private bool isGrounded = true;
+    private float lastDirection = 1f;
     RaycastHit2D rayCastGround1;
     RaycastHit2D rayCastGround2;
 
@@ -36,7 +37,6 @@ public class GonzaloPlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         anchoPersonaje = GetComponent<SpriteRenderer>().bounds.size.x;
         sprite = GetComponent<SpriteRenderer>();
-        RayDraws(); //MÉTODO PARA VER LOS RAYCAST EN TIEMPO DE EJECUCIÓN, QUITAR EN LA VERSIÓN FINAL
     }
 
     
@@ -72,9 +72,8 @@ public class GonzaloPlayerMovement : MonoBehaviour
         {
             PlayerMotion();
             Jumping();
-            RayDraws();
+            FlipSprite();
         }
-
         //Comprobar que está en tierra
         if (rayCastGround1 || rayCastGround2)
         {
@@ -85,6 +84,7 @@ public class GonzaloPlayerMovement : MonoBehaviour
         {
             isGrounded = false;
         }
+        RayDraws(); //MÉTODO PARA VER LOS RAYCAST EN TIEMPO DE EJECUCIÓN, QUITAR EN LA VERSIÓN FINAL
     }
 
     //Movimiento del jugador
@@ -92,16 +92,24 @@ public class GonzaloPlayerMovement : MonoBehaviour
     {
         //Lectura de movimiento
         movement.x = Input.GetAxisRaw("Horizontal");
-        //Se comprueba la dirección para girar el sprite
-        if (rb.velocity.x < 0.001)
+        //Se guarda la última dirección 
+        if (movement.x != 0)
+        {
+            lastDirection = movement.x;
+        }
+    }
+
+    //Girar el sprite utilizando la última dirección
+    private void FlipSprite()
+    {
+        if (lastDirection == 1)
         {
             sprite.flipX = true;
         }
-        if (rb.velocity.x > 0)
+        else if (lastDirection == -1)
         {
             sprite.flipX = false;
         }
-
     }
 
     //Metodo que gestiona el salto del jugador a base de RayCasts, así se comprueba si está en el suelo o no, para evitar saltar en el aire
@@ -116,6 +124,29 @@ public class GonzaloPlayerMovement : MonoBehaviour
         }
     }
 
+    //Inicia corrutinas, es llamado en la bomba cuando impacta con el jugador
+    public void PlayerBombed()
+    {
+        StartCoroutine(PlayerCantMove());
+        StartCoroutine(PlayerIsImpulsed());
+    }
+
+    //Corrutina para que el jugador no pueda moverse durante poco tiempo
+    IEnumerator PlayerCantMove()
+    {
+        IsAllowedToMove = false;
+        yield return new WaitForSeconds(0.5f);
+        IsAllowedToMove = true;
+    }
+
+    //Corrutina para que el movimiento horizontal no se detenga
+    IEnumerator PlayerIsImpulsed()
+    {
+        IsBeenImpulsed = true;
+        yield return new WaitForSeconds(1.5f);
+        //playerMovementScript.IsBeenImpulsed = false;
+    }
+
     //Método de comprobación en tiempo de ejecución para simular los Raycast que detectan que el jugador pueda saltar 
     private void RayDraws()
     {
@@ -123,4 +154,9 @@ public class GonzaloPlayerMovement : MonoBehaviour
         Debug.DrawRay(new Vector2(this.transform.position.x - anchoPersonaje / 2, this.transform.position.y), Vector2.down, Color.red);
     }
 
+    //Dar la dirección del jugador
+    public bool GetPlayerDirection()
+    {
+        return sprite.flipX;
+    }
 }

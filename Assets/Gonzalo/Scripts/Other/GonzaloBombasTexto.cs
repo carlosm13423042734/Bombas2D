@@ -7,6 +7,8 @@ public class GonzaloBombasTexto : MonoBehaviour
 {
     [SerializeField]
     TextMeshProUGUI numBombs;
+    [SerializeField]
+    TextMeshProUGUI throwMode;
 
     GonzaloPlayerDropBomb bombDropperScript;
 
@@ -26,5 +28,6 @@ public class GonzaloBombasTexto : MonoBehaviour
     private void UpdateText() 
     {       
         numBombs.text = ("BOMBAS DISPONIBLES: " + bombDropperScript.GetNumBombs());
+        throwMode.text = ("MODO DE LANZADO: " + GonzaloGameManager.Instance.PlayerManager.GetPlayerThrowMode());
     }
 }
